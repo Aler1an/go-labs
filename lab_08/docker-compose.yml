@@ -1,0 +1,41 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: contacts_db
+
+    environment:
+      POSTGRES_DB: contacts_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations/001_create_contacts.sql:/docker-entrypoint-initdb.d/001_create_contacts.sql
+
+  app:
+    build:
+      context: ..
+      dockerfile: lab_08/Dockerfile
+
+    container_name: contacts_app
+
+    depends_on:
+      - db
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: contacts_db
+
+volumes:
+  postgres_data:
